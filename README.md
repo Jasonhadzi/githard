@@ -1,5 +1,5 @@
-# AppDevProjectTemplate
-Template for MIS385N (Advanced Programming and App Development) Team Project
+# Githard
+MIS385N (Advanced Programming and App Development) Githard Team Project
 # Project Overview
 
 This project is a web application built using Flask and MongoDB, and React. The application manages users, projects, and hardware sets, allowing users to log in, join projects, and request hardware. The backend consists of four main Python files that handle different aspects of the application's functionality.
@@ -79,5 +79,3 @@ This file contains functions for managing users in the database.
    - Routes call appropriate functions from the respective database modules to manage users, projects, and hardware sets.
 
 ## Client side
-
-1. Design choices are up to you, but an example directory structure has been provided. 
