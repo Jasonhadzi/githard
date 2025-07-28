@@ -1,5 +1,9 @@
+# MongoDB configuration moved to environment variables
+# See .env.example for required environment variables
+# This file is kept for reference but no longer contains sensitive data
 mongo:
-  username: githardHaaS
-  password: Qk0zCT3b9Em8P27I
-  host: githard-cluster.oc6pbah.mongodb.net
-  database: githard-cluster
+  # Use environment variables instead:
+  # MONGO_USERNAME=your_username
+  # MONGO_PASSWORD=your_password  
+  # MONGO_HOST=your_host
+  # MONGO_DATABASE=your_database
