@@ -16,7 +16,7 @@ server/venv/
 venv/
 *.so
 .Python
-build/
+# build/  <- Commented out to allow server/build directory
 develop-eggs/
 dist/
 downloads/
