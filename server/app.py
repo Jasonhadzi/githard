@@ -26,25 +26,6 @@ def api():
     else:
         return jsonify({'response': 'User Not Found'}), 404
 
-# Debug route to check static folder
-@app.route('/debug/static')
-def debug_static():
-    try:
-        import os
-        static_path = app.static_folder
-        files = os.listdir(static_path) if os.path.exists(static_path) else []
-        index_exists = os.path.exists(os.path.join(static_path, 'index.html'))
-        
-        return jsonify({
-            'static_folder': static_path,
-            'static_folder_exists': os.path.exists(static_path),
-            'files_in_static': files,
-            'index_html_exists': index_exists,
-            'current_working_directory': os.getcwd()
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)})
-
 # Catch-all route - ensures that any route not handled by the back-end API
 # will be handled by the front-end, which is necessary for client-side routing
 @app.route('/', defaults={'path': ''})
