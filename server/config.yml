@@ -1,0 +1,9 @@
+# MongoDB configuration moved to environment variables
+# See .env.example for required environment variables
+# This file is kept for reference but no longer contains sensitive data
+mongo:
+  # Use environment variables instead:
+  # MONGO_USERNAME=your_username
+  # MONGO_PASSWORD=your_password  
+  # MONGO_HOST=your_host
+  # MONGO_DATABASE=your_database
