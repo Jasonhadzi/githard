@@ -1,6 +1,6 @@
 # Import necessary libraries and modules
 from bson.objectid import ObjectId
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from pymongo import MongoClient
 import os
 import sys
@@ -11,11 +11,21 @@ import projectsDatabase as projectsDB
 import hardwareDatabase as hardwareDB
 from config import config
 
-# Initialize a new Flask web application
-app = Flask(__name__)
+# Initialize a new Flask web application with static files from React build
+app = Flask(__name__, static_folder='../client/build', static_url_path='')
 
 # Configure Flask from environment variables
 app.config['DEBUG'] = config.flask_debug
+
+# Serve React App
+@app.route('/')
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/<path:path>')
+def static_proxy(path):
+    # Serve static files from React build
+    return send_from_directory(app.static_folder, path)
 
 def get_mongodb_client():
     """Get MongoDB client using secure connection string from environment variables"""

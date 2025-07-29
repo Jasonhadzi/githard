@@ -1,0 +1,13 @@
+{
+  "name": "githard-fullstack",
+  "version": "1.0.0",
+  "description": "GitHard Hardware Management System",
+  "scripts": {
+    "build": "cd client && npm run build",
+    "heroku-postbuild": "cd client && npm install && npm run build"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+} 
