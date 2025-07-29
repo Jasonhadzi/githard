@@ -1,6 +1,7 @@
 # Import necessary libraries and modules
 from bson.objectid import ObjectId
 from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory
 from pymongo import MongoClient
 import os
 import sys
@@ -11,21 +12,29 @@ import projectsDatabase as projectsDB
 import hardwareDatabase as hardwareDB
 from config import config
 
-# Initialize a new Flask web application with static files from React build
-app = Flask(__name__, static_folder='../client/build', static_url_path='')
+# Initialize a new Flask web application - specify static files are in build directory
+app = Flask(__name__, static_folder='build')
 
 # Configure Flask from environment variables
 app.config['DEBUG'] = config.flask_debug
 
-# Serve React App
-@app.route('/')
-def serve():
-    return send_from_directory(app.static_folder, 'index.html')
+@app.route('/api', methods=['POST'])
+def api():
+    data = request.json
+    if data['input'] == 'githard':
+        return jsonify({'response': 'Hello, team githard!'})
+    else:
+        return jsonify({'response': 'User Not Found'}), 404
 
+# Catch-all route - ensures that any route not handled by the back-end API
+# will be handled by the front-end, which is necessary for client-side routing
+@app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
-def static_proxy(path):
-    # Serve static files from React build
-    return send_from_directory(app.static_folder, path)
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 def get_mongodb_client():
     """Get MongoDB client using secure connection string from environment variables"""
@@ -42,26 +51,19 @@ def get_mongodb_client():
         
     except Exception as e:
         print(f"Error connecting to MongoDB: {e}")
-        sys.exit(1)
+        return None
 
-# Test MongoDB connection on startup
+# Test MongoDB connection on startup (but don't exit if it fails)
 try:
     test_client = get_mongodb_client()
-    test_client.close()
-    print("✓ MongoDB connection successful")
-except Exception as e:
-    print(f"✗ Failed to connect to MongoDB: {e}")
-    print("Please check your environment variables in .env file")
-    sys.exit(1)
-
-
-@app.route('/api', methods=['POST'])
-def api():
-    data = request.json
-    if data['input'] == 'githard':
-        return jsonify({'response': 'Hello, team githard!'})
+    if test_client:
+        test_client.close()
+        print("✓ MongoDB connection successful")
     else:
-        return jsonify({'response': 'User not found'}), 404
+        print("⚠ MongoDB connection failed, but continuing startup")
+except Exception as e:
+    print(f"⚠ Failed to connect to MongoDB: {e}")
+    print("App will start but database features may not work")
 
 # Route for user login
 @app.route('/login', methods=['POST'])
@@ -269,5 +271,6 @@ def check_inventory():
 
 # Main entry point for the application
 if __name__ == '__main__':
-    app.run(debug=config.flask_debug, host='0.0.0.0', port=5001)
+    port = int(os.environ.get('PORT', 5001))
+    app.run(debug=False, host='0.0.0.0', port=port)
 
