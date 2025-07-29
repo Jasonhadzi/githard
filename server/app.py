@@ -48,8 +48,8 @@ except Exception as e:
 @app.route('/api', methods=['POST'])
 def api():
     data = request.json
-    if data['input'] == 'Jason':
-        return jsonify({'response': 'Hello, Jason!'})
+    if data['input'] == 'githard':
+        return jsonify({'response': 'Hello, team githard!'})
     else:
         return jsonify({'response': 'User not found'}), 404
 
