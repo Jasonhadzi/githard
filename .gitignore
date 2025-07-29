@@ -1,13 +1,22 @@
 # Environment variables
 .env
+server/.env
+
+# Node modules
+client/node_modules/
+
+# Build files (we want to include build folder for deployment)
+# client/build/  <- Make sure this line is commented out or removed
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
+server/venv/
+venv/
 *.so
 .Python
-build/
+# build/  <- Commented out to allow server/build directory
 develop-eggs/
 dist/
 downloads/
