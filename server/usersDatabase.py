@@ -25,8 +25,27 @@ def __queryUser(client, username, userId):
 
 # Function to log in a user
 def login(client, username, userId, password):
-    # Authenticate a user and return login status
-    pass
+    """
+     Authenticate a user by checking their username, userId, and password in the MongoDB users collection.
+
+    Args:
+        client: A MongoClient instance.
+        username (str): The user's username.
+        userId (str): The user's unique ID.
+        password (str): The user's password (plaintext or hashed, depending on usage).
+
+    Returns:
+        string: indicating if user is found, wrong password, or success.
+    """
+    users_collection = client["GitHard"]["users"]
+    user = users_collection.find_one({"username": username, "userId": userId})
+
+    if not user:
+        return "user_not_found"
+    elif user["password"] != password:
+        return "wrong_password"
+    else:
+        return "success"
 
 # Function to add a user to a project
 def joinProject(client, userId, projectId):
