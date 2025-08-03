@@ -1,6 +1,7 @@
 # Environment variables
 .env
 server/.env
+githardvenv
 
 # Node modules
 client/node_modules/
