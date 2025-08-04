@@ -1,7 +1,6 @@
 # Import necessary libraries and modules
 from bson.objectid import ObjectId
 from flask import Flask, request, jsonify, send_from_directory
-from flask import Flask, request, jsonify, send_from_directory
 from pymongo import MongoClient
 import os
 import sys
@@ -67,19 +66,27 @@ except Exception as e:
 
 # Route for user login
 @app.route('/login', methods=['POST'])
-def login():
+def login():        
     # Extract data from request
-
+    data = request.get_json()
     # Connect to MongoDB
     client = get_mongodb_client()
-
     # Attempt to log in the user using the usersDB module
-
-    # Close the MongoDB connection
+    username = data.get('username')
+    userId = data.get('userId')
+    password = data.get('password')
+    
+    result = usersDB.login(client, username, userId, password)
     client.close()
 
-    # Return a JSON response
-    return jsonify({})
+    if result == "success":
+        return jsonify({'status': 'success', 'message': 'Login successful'})
+    elif result == "wrong_password":
+        return jsonify({'status': 'failure', 'message': 'Incorrect password'}), 401
+    elif result == "user_not_found":
+        return jsonify({'status': 'failure', 'message': 'User not found'}), 404
+
+
 
 # Route for the main page (Work in progress)
 @app.route('/main')

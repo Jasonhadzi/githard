@@ -1,6 +1,7 @@
 # Environment variables
 .env
 server/.env
+githardvenv
 
 # Node modules
 client/node_modules/
@@ -36,6 +37,7 @@ wheels/
 venv/
 env/
 ENV/
+gitvardvenv/
 
 # IDE
 .vscode/
