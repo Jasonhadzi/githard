@@ -218,34 +218,45 @@ def get_all_hw_names():
 # Route for getting hardware information
 @app.route('/get_hw_info', methods=['POST'])
 def get_hw_info():
+    #use chat to refine code 
     # Extract data from request
+    data = request.get_json()
+    hwSetName = data.get('hwSetName')
 
     # Connect to MongoDB
     client = get_mongodb_client()
 
     # Fetch hardware set information using the hardwareDB module
-
+    hw = hardwareDB.queryHardwareSet(client, hwSetName)
     # Close the MongoDB connection
     client.close()
-
-    # Return a JSON response
-    return jsonify({})
+    if hw:
+        return jsonify({
+            'capacity': hw['capacity'],
+            'availability': hw['availability']
+        })
+    else:
+        # Return a JSON response
+        return jsonify({'error': 'Hardware set not found'}), 404
 
 # Route for checking out hardware
 @app.route('/check_out', methods=['POST'])
 def check_out():
     # Extract data from request
-
+    data = request.get_json()
+    hwSetName = data.get('hwSetName')
+    qty = int(data.get('qty'))
+    projectId = data.get('projectId')
     # Connect to MongoDB
     client = get_mongodb_client()
 
     # Attempt to check out the hardware using the projectsDB module
-
+    result = projectsDB.checkOutHW(client, projectId, hwSetName, qty)
     # Close the MongoDB connection
     client.close()
 
     # Return a JSON response
-    return jsonify({})
+    return jsonify({'sucess':result})
 
 # Route for checking in hardware
 @app.route('/check_in', methods=['POST'])
