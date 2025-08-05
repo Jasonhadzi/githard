@@ -17,6 +17,7 @@ body {
 
 .card {
   background: white;
+  align-items: center; 
   padding: 30px;
   border-radius: 10px;
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
@@ -64,4 +65,17 @@ body {
   font-weight: bold;
   color: #4facfe; 
   margin-bottom: 10px;
+}
+
+body {
+  background-color: #6dd5fa;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.centered-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }

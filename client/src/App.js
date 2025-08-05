@@ -1,30 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './LoginPage';
-import HomePage from './HomePage';
+import ProjectManager from './projectManager';
+import ProjectDashboard from './projectDashboard';
 import './index.css';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState('');
-
-  const handleLogin = (userId) => {
-    setUser(userId);
-    setIsLoggedIn(true);
-  };
-
-  const handleLogout = () => {
-    setUser('');
-    setIsLoggedIn(false); 
-  };
-
   return (
-    <div className="app-container">
-      {isLoggedIn ? (
-        <HomePage onLogout={handleLogout} user={user} />
-      ) : (
-        <LoginPage onLogin={handleLogin} />
-      )}
-    </div>  
+    <div className="app-wrapper">
+      <Router>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/manager/:userId" element={<ProjectManager />} />
+          <Route path="/dashboard/:userId/:projectId" element={<ProjectDashboard />} />
+        </Routes>
+      </Router>
+    </div>
   );
 }
 
