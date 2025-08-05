@@ -72,11 +72,10 @@ def login():
     # Connect to MongoDB
     client = get_mongodb_client()
     # Attempt to log in the user using the usersDB module
-    username = data.get('username')
     userId = data.get('userId')
     password = data.get('password')
     
-    result = usersDB.login(client, username, userId, password)
+    result = usersDB.login(client, userId, password)
     client.close()
 
     if result == "success":
@@ -124,17 +123,20 @@ def join_project():
 @app.route('/add_user', methods=['POST'])
 def add_user():
     # Extract data from request
-
+    data = request.get_json()
     # Connect to MongoDB
     client = get_mongodb_client()
-
-    # Attempt to add the user using the usersDB module
-
+    # Attempt to log in the user using the usersDB module
+    userId = data.get('userId')
+    password = data.get('password')
     # Close the MongoDB connection
+    result = usersDB.addUser(client, userId, password)
     client.close()
 
-    # Return a JSON response
-    return jsonify({})
+    if result == "User added successfully":
+        return jsonify({'status': 'success', 'message': result})
+    elif result == "UserId already exists":
+        return jsonify({'status': 'failure', 'message': result}), 409
 
 # Route for getting the list of user projects
 @app.route('/get_user_projects_list', methods=['POST'])
