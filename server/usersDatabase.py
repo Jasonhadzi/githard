@@ -38,10 +38,10 @@ def addUser(client, userId, password):
         users_collection.insert_one(user_data)
         return "User added successfully"
 
-# Helper function to query a user by username and userId
-def __queryUser(client, username, userId):
-    # Query and return a user from the database
-    pass
+# # Helper function to query a user by username and userId (no need as we are using userId only)
+# def __queryUser(client, username, userId):
+#     # Query and return a user from the database
+#     pass
 
 # Function to log in a user
 def login(client, userId, password):
@@ -68,11 +68,46 @@ def login(client, userId, password):
 
 # Function to add a user to a project
 def joinProject(client, userId, projectId):
-    # Add a user to a specified project
-    pass
+    """
+    Add a user to a specified project
+
+    Args:
+        client: A MongoClient instance.
+        userId (str): The user's unique ID.
+        projectId (str): The user's password (plaintext or hashed, depending on usage).
+
+    Returns:
+        string: indicating if user is found, wrong password, or success.
+    """
+    users_collection = client["GitHard"]["users"]
+    user = users_collection.find_one({"userId": userId})
+
+
+    if projectId in user.get("projects", []):
+        return "Project already joined"
+    
+    users_collection.update_one(
+        {"userId": userId},
+        {"$push": {"projects": projectId}}
+    )
+    return "Project joined successfully"
 
 # Function to get the list of projects for a user
 def getUserProjectsList(client, userId):
-    # Get and return the list of projects a user is part of
-    pass
+    """
+    Get the list of projects for a user
 
+    Args:
+        client: A MongoClient instance.
+        userId (str): The user's unique ID.
+
+    Returns:
+        List: projects the user joined
+    """
+    users_collection = client["GitHard"]["users"]
+    user = users_collection.find_one({"userId": userId})
+
+    if not user:
+        return "User not found"
+
+    return user.get("projects", [])
