@@ -1,10 +1,13 @@
 import requests
 
-url = "http://127.0.0.1:5001/login"
+url = "http://127.0.0.1:5001/create_project"
 
 payload = {
     "userId": "xs12",
-    "password": "password"
+    "projectName": "twqeest",
+    "projectId": "no1qesdasq234",
+    "description": "miwqekumiku"
+    
 }
 
 headers = {

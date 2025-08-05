@@ -21,13 +21,54 @@ def queryProject(client, projectId):
 
 # Function to create a new project
 def createProject(client, projectName, projectId, description):
-    # Create a new project in the database
-    pass
+    """
+     Create a new project in the MongoDB project collection.
+
+    Args:
+        client: A MongoClient instance.
+        projectName (str): The user's username.
+        projectId(str): The user's password (plaintext or hashed, depending on usage).
+        descriotun(str): describe project
+
+    Returns:
+        string: indicating if project created.
+    """
+    projects_collection = client["GitHard"]["projects"]
+    project = projects_collection.find_one({"projectId": projectId})
+    if project:
+        return "ProjectId already taken"
+    else:
+        project_data = {
+            "projectName": projectName,
+            "description":description,
+            "projectId":projectId
+        }
+        projects_collection.insert_one(project_data)
+        return "Project added successfully"
 
 # Function to add a user to a project
 def addUser(client, projectId, userId):
-    # Add a user to the specified project
-    pass
+    """
+     A user join a project.
+
+    Args:
+        client: A MongoClient instance.
+        projectId (str): Project's id
+        userId(str): User's id.
+
+    Returns:
+        string: indicating if project created.
+    """
+    projects_collection = client["GitHard"]["projects"]
+    project = projects_collection.find_one({"projectId": projectId})
+    if not project:
+        return "Project does not exist"
+    projects_collection.update_one(
+    {"projectId": projectId},
+    {"$push": {"users": userId}}
+    )
+    return "Project joined successfully"
+
 
 # Function to update hardware usage in a project
 def updateUsage(client, projectId, hwSetName):

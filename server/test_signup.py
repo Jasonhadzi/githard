@@ -1,10 +1,10 @@
 import requests
 
-url = "http://127.0.0.1:5001/login"
+url = "http://127.0.0.1:5001/add_user"
 
 payload = {
     "userId": "xs12",
-    "password": "password"
+    "password": "password1"
 }
 
 headers = {

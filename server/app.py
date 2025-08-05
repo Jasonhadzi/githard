@@ -72,11 +72,10 @@ def login():
     # Connect to MongoDB
     client = get_mongodb_client()
     # Attempt to log in the user using the usersDB module
-    username = data.get('username')
     userId = data.get('userId')
     password = data.get('password')
     
-    result = usersDB.login(client, username, userId, password)
+    result = usersDB.login(client, userId, password)
     client.close()
 
     if result == "success":
@@ -108,65 +107,83 @@ def mainPage():
 @app.route('/join_project', methods=['POST'])
 def join_project():
     # Extract data from request
-
+    data = request.get_json()
+    userId = data.get('userId')    
+    projectId = data.get('projectId')
     # Connect to MongoDB
     client = get_mongodb_client()
-
     # Attempt to join the project using the usersDB module
-
+    resultProj = projectsDB.addUser(client, projectId, userId)
+    resultUser = usersDB.joinProject(client, userId, projectId)    
     # Close the MongoDB connection
     client.close()
-
     # Return a JSON response
-    return jsonify({})
+    if resultUser == resultProj == "Project joined successfully":
+        return jsonify({'status': 'success', 'message': resultUser})
+    elif resultUser == "Project already joined":
+        return jsonify({'status': 'failure', 'message': resultUser}), 409
+    elif resultProj == "Project does not exist":
+        return jsonify({'status': 'failure', 'message': resultProj}), 404
+    else:
+        return jsonify({'status': 'failure', 'message': "one is wrong"}), 404
 
 # Route for adding a new user
 @app.route('/add_user', methods=['POST'])
 def add_user():
     # Extract data from request
-
+    data = request.get_json()
     # Connect to MongoDB
     client = get_mongodb_client()
-
-    # Attempt to add the user using the usersDB module
-
-    # Close the MongoDB connection
+    # Attempt to log in the user using the usersDB module
+    userId = data.get('userId')
+    password = data.get('password')
+    result = usersDB.addUser(client, userId, password)
+    # Close the MongoDB connection   
     client.close()
 
-    # Return a JSON response
-    return jsonify({})
+    if result == "User added successfully":
+        return jsonify({'status': 'success', 'message': result})
+    elif result == "UserId already exists":
+        return jsonify({'status': 'failure', 'message': result}), 409
 
 # Route for getting the list of user projects
 @app.route('/get_user_projects_list', methods=['POST'])
 def get_user_projects_list():
     # Extract data from request
-
+    data = request.get_json()
     # Connect to MongoDB
     client = get_mongodb_client()
 
     # Fetch the user's projects using the usersDB module
-
+    userId = data.get('userId')
+    result = usersDB.getUserProjectsList(client, userId)
     # Close the MongoDB connection
     client.close()
-
     # Return a JSON response
-    return jsonify({})
+    return jsonify({"status": "success", "projects": result})
 
 # Route for creating a new project
 @app.route('/create_project', methods=['POST'])
 def create_project():
     # Extract data from request
-
+    data = request.get_json()
     # Connect to MongoDB
     client = get_mongodb_client()
-
     # Attempt to create the project using the projectsDB module
-
+    userId = data.get('userId')
+    projectName = data.get("projectName")
+    projectId = data.get("projectId")
+    description = data.get("description")
+    if not userId:
+        return jsonify({"status": "failure", "message": "User ID missing"}), 401
+    result = projectsDB.createProject(client, projectName, projectId, description)
     # Close the MongoDB connection
     client.close()
-
     # Return a JSON response
-    return jsonify({})
+    if result == "Project added successfully":
+        return jsonify({'status': 'success', 'message': result})
+    elif result == "ProjectId already taken":
+        return jsonify({'status': 'failure', 'message': result}), 409
 
 # Route for getting project information
 @app.route('/get_project_info', methods=['POST'])
@@ -246,21 +263,21 @@ def check_in():
     # Return a JSON response
     return jsonify({})
 
-# Route for creating a new hardware set
-@app.route('/create_hardware_set', methods=['POST'])
-def create_hardware_set():
-    # Extract data from request
+# # Route for creating a new hardware set (no need to create hardware set in this project)
+# @app.route('/create_hardware_set', methods=['POST'])
+# def create_hardware_set():
+#     # Extract data from request
 
-    # Connect to MongoDB
-    client = get_mongodb_client()
+#     # Connect to MongoDB
+#     client = get_mongodb_client()
 
-    # Attempt to create the hardware set using the hardwareDB module
+#     # Attempt to create the hardware set using the hardwareDB module
 
-    # Close the MongoDB connection
-    client.close()
+#     # Close the MongoDB connection
+#     client.close()
 
-    # Return a JSON response
-    return jsonify({})
+#     # Return a JSON response
+#     return jsonify({})
 
 # Route for checking the inventory of projects
 @app.route('/api/inventory', methods=['GET'])
