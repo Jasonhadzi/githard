@@ -3,9 +3,8 @@ import requests
 url = "http://127.0.0.1:5001/login"
 
 payload = {
-    "username": "tester",
-    "userId": "1",
-    "password": "password1"
+    "userId": "xs12",
+    "password": "password"
 }
 
 headers = {
