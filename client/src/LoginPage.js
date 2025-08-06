@@ -10,8 +10,20 @@ function LoginPage() {
 
   const handleLogin = () => {
     if (userId && password) {
-      localStorage.setItem('userId', userId);
-      navigate(`/manager/${userId}`);
+        fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, password })
+      })
+        .then(async res => {
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message);
+          localStorage.setItem('userId', userId);
+          navigate(`/manager/${userId}`);
+        })
+        .catch(err => {
+          alert(err.message); // shows error from backend (e.g., wrong password)
+        });
     } else {
       alert('Please enter User ID and Password');
     }
@@ -19,8 +31,20 @@ function LoginPage() {
 
   const handleCreateUser = () => {
     if (newUserId && newPassword) {
-      localStorage.setItem('userId', newUserId);
-      navigate(`/manager/${newUserId}`);
+      fetch('/add_user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: newUserId, password: newPassword })
+      })
+        .then(async res => {
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message);
+          localStorage.setItem('userId', newUserId);
+          navigate(`/manager/${newUserId}`);
+        })
+        .catch(err => {
+          alert(err.message); // shows error like "user already exists"
+        });
     } else {
       alert('Please enter User ID and Password to create account');
     }

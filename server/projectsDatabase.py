@@ -109,7 +109,7 @@ def updateUsage(client, projectId, hwSetName, qty):
     return True
 
 # Function to check out hardware for a project
-def checkOutHW(client, projectId, hwSetName, qty, userId):
+def checkOutHW(client, projectId, hwSetName, qty, userId=None):
     # Check out hardware for the specified project and update availability
     db = client["GitHard"]
 
@@ -136,8 +136,6 @@ def checkOutHW(client, projectId, hwSetName, qty, userId):
         addUser(client, projectId, userId)
     
     return "Checked out successfully"
-
-
 
 # Function to check in hardware for a project
 def checkInHW(client, projectId, hwSetName, qty, userId):
