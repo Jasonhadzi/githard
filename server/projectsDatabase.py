@@ -16,8 +16,24 @@ Project = {
 
 # Function to query a project by its ID
 def queryProject(client, projectId):
-    # Query and return a project from the database
-    pass
+    """
+    Return a project data set, including projectId.
+    Args:
+        client: A MongoClient instance
+        projectId(str): The Unique ID for project
+    
+    Returns:
+        tuple:
+            - bool: Indicate whether the project exists
+            - dict or str: A project data set
+    """
+    pr_col = client["GitHard"]["projects"]
+
+    pr_set = pr_col.find_one({"projectId": projectId})
+    if not pr_set:
+        return False, "Project does not exist"
+    
+    return True, pr_set
 
 # Function to create a new project
 def createProject(client, projectName, projectId, description):
@@ -71,32 +87,83 @@ def addUser(client, projectId, userId):
 
 
 # Function to update hardware usage in a project
-def updateUsage(client, projectId, hwSetName):
+def updateUsage(client, projectId, hwSetName, qty):
     # Update the usage of a hardware set in the specified project
-    pass
+    project_col = client['GitHard']['projects']
+    project = project_col.find_one({"projectId": projectId})
+
+    if not project:
+        print("Project does not exist")
+        return False
+    
+    hw_sets = project.get("hwSets", {})
+    if hwSetName not in hw_sets:
+        hw_sets[hwSetName] = qty
+    else:
+        hw_sets[hwSetName] += qty
+
+    project_col.update_one(
+        {"projectId":projectId},
+        {"$set":{"hwSets":hw_sets}}
+    )
+    return True
 
 # Function to check out hardware for a project
 def checkOutHW(client, projectId, hwSetName, qty, userId=None):
     # Check out hardware for the specified project and update availability
-    hw = hardwareDB.queryHardwareSet(client, hwSetName)
-    if not hw or hw['availability'] < qty:
-        return False
+    db = client["GitHard"]
 
-    # update the hardware valibility
-    newAvail = hw['availability'] - qty
-    hardwareDB.updateAvailability(client, hwSetName, newAvail)
-
-    # add tge aty project to the hw sets 
-    client.projects.update_one(
-        { 'projectId': projectId },
-        { '$inc': { f"hwSets.{hwSetName}": qty } },
-        upsert=True
-    )
-
-    return True
+    project = db["projects"].find_one({"projectId": projectId})
+    if not project:
+        return "Project does not exist"
+    
+    user = db["users"].find_one({"userId": userId})
+    if not user:
+        return "User does not exist"
+    
+    hw = db["hardware"].find_one({"hwSetName":hwSetName})
+    if not hw:
+        return "Hardware does not exist"
+    
+    availableQty = hw["availability"]
+    if availableQty < qty:
+        return "Not enough units available to check out"
+    
+    hardwareDB.requestSpace(client, hwSetName, qty)
+    updateUsage(client, projectId, hwSetName, qty)
+    
+    if userId not in project.get('users',[]):
+        addUser(client, projectId, userId)
+    
+    return "Checked out successfully"
 
 # Function to check in hardware for a project
 def checkInHW(client, projectId, hwSetName, qty, userId):
     # Check in hardware for the specified project and update availability
-    pass
+    db = client["GitHard"]
 
+    project = db["projects"].find_one({"projectId": projectId})
+    if not project:
+        return "Project does not exist"
+    
+    user = db["users"].find_one({"userId": userId})
+    if not user:
+        return "User does not exist"
+    
+    hw = db["hardware"].find_one({"hwSetName":hwSetName})
+    if not hw:
+        return "Hardware does not exist"
+
+    currCapacity = hw.get("capacity")
+    currAvailability = hw.get("availability")
+    newQty = qty + currAvailability
+    if currCapacity < newQty:
+        return "Too big to check in"
+    
+    hardwareDB.updateAvailability(client, hwSetName, qty)
+    updateUsage(client, projectId, hwSetName, -qty)
+
+    if userId not in project.get('users',[]):
+        addUser(client, projectId, userId)
+    
+    return "Checked in successfully"

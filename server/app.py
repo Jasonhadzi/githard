@@ -189,23 +189,28 @@ def create_project():
         return jsonify({'status': 'failure', 'message': result}), 409
 
 # Route for getting project information
-@app.route('/get_project_info', methods=['POST'])
+@app.route('/get_project_info', methods=['GET'])
 def get_project_info():
-    # Extract data from request
+    projectId = request.args.get("projectId")
 
+    if not projectId:
+        return jsonify({"error": "Missing 'projectId' in request"}), 400
     # Connect to MongoDB
     client = get_mongodb_client()
-
-    # Fetch project information using the projectsDB module
-
-    # Close the MongoDB connection
+    success, result = projectsDB.queryProject(client, projectId)
     client.close()
-
-    # Return a JSON response
-    return jsonify({})
+    if success: 
+        return jsonify({"projectId": result.get("projectId"),
+            "projectName": result.get("projectName"),
+            "description": result.get("description"),
+            "hwSets": result.get("hwSets"),
+            "users": result.get("users")
+                    }), 200
+    else:
+        return jsonify({"message": result}), 404
 
 # Route for getting all hardware names
-@app.route('/get_all_hw_names', methods=['POST'])
+@app.route('/get_all_hw_names', methods=['GET'])
 def get_all_hw_names():
     # Connect to MongoDB
     client = get_mongodb_client()
@@ -219,63 +224,101 @@ def get_all_hw_names():
     return jsonify({})
 
 # Route for getting hardware information
-@app.route('/get_hw_info', methods=['POST'])
+@app.route('/get_hw_info', methods=['GET'])
 def get_hw_info():
     #use chat to refine code 
     # Extract data from request
-    data = request.get_json()
-    hwSetName = data.get('hwSetName')
 
+    hardwareName = request.args.get("hwSetName")
+    if not hardwareName:
+        return jsonify({"error": "Missing 'projectId' in request"}), 400
     # Connect to MongoDB
     client = get_mongodb_client()
-
-    # Fetch hardware set information using the hardwareDB module
-    hw = hardwareDB.queryHardwareSet(client, hwSetName)
-    # Close the MongoDB connection
+    success, result = hardwareDB.queryHardwareSet(client, hardwareName)
     client.close()
-    if hw:
+    if success: 
         return jsonify({
-            'capacity': hw['capacity'],
-            'availability': hw['availability']
-        })
+            "hardwareName": result.get("hwSetName"),
+            "capacity": result.get("capacity"),
+            "availability": result.get("availability")
+            }), 200
     else:
-        # Return a JSON response
-        return jsonify({'error': 'Hardware set not found'}), 404
+        return jsonify({"message": result}), 404
 
 # Route for checking out hardware
 @app.route('/check_out', methods=['POST'])
 def check_out():
     # Extract data from request
     data = request.get_json()
-    hwSetName = data.get('hwSetName')
-    qty = int(data.get('qty'))
-    projectId = data.get('projectId')
+    projectId = data.get("projectId")
+    hwSetName = data.get("hwSetName")
+    qty = data.get('qty')
+    userId = data.get("userId")
+
+    if not all([projectId, hwSetName, qty, userId]):
+        return jsonify({"error": "Missing required fields"}), 400
+    
+    try:
+        qty = int(qty)
+    except ValueError:
+        return jsonify({"error": "Quantity must be an integer"}), 401
+
     # Connect to MongoDB
     client = get_mongodb_client()
 
     # Attempt to check out the hardware using the projectsDB module
-    result = projectsDB.checkOutHW(client, projectId, hwSetName, qty)
+    result = projectsDB.checkOutHW(client, projectId, hwSetName, qty, userId)
     # Close the MongoDB connection
     client.close()
 
     # Return a JSON response
-    return jsonify({'sucess':result})
+    if result == "Project does not exist":
+        return jsonify({"error": result}), 404
+    elif result == "User does not exist":
+        return jsonify({"error": result}), 404
+    elif result == "Hardware does not exist":
+        return jsonify({"error": result}), 404
+    elif result == "Not enough units available to check out":
+        return jsonify({"error": result}), 400
+    elif result == "Checked out successfully":
+        return jsonify({"message": result}), 200
 
 # Route for checking in hardware
 @app.route('/check_in', methods=['POST'])
 def check_in():
     # Extract data from request
+    data = request.get_json()
+    projectId = data.get("projectId")
+    hwSetName = data.get("hwSetName")
+    qty = data.get('qty')
+    userId = data.get("userId")
 
+    if not all([projectId, hwSetName, qty, userId]):
+        return jsonify({"error": "Missing required fields"}), 400
+    
+    try:
+        qty = int(qty)
+    except ValueError:
+        return jsonify({"error": "Quantity must be an integer"}), 401
     # Connect to MongoDB
     client = get_mongodb_client()
 
     # Attempt to check in the hardware using the projectsDB module
-
+    result = projectsDB.checkInHW(client, projectId, hwSetName, qty, userId)
     # Close the MongoDB connection
     client.close()
 
     # Return a JSON response
-    return jsonify({})
+    if result == "Project does not exist":
+        return jsonify({"error": result}), 404
+    elif result == "User does not exist":
+        return jsonify({"error": result}), 404
+    elif result == "Hardware does not exist":
+        return jsonify({"error": result}), 404
+    elif result == "Too big to check in":
+        return jsonify({"error": result}), 400
+    elif result == "Checked in successfully":
+        return jsonify({"message": result}), 200
 
 # # Route for creating a new hardware set (no need to create hardware set in this project)
 # @app.route('/create_hardware_set', methods=['POST'])
