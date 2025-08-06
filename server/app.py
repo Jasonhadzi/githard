@@ -112,20 +112,21 @@ def join_project():
     projectId = data.get('projectId')
     # Connect to MongoDB
     client = get_mongodb_client()
-    # Attempt to join the project using the usersDB module
+    # Attempt to join the project using the usersDB module  
     resultProj = projectsDB.addUser(client, projectId, userId)
-    resultUser = usersDB.joinProject(client, userId, projectId)    
-    # Close the MongoDB connection
-    client.close()
-    # Return a JSON response
-    if resultUser == resultProj == "Project joined successfully":
-        return jsonify({'status': 'success', 'message': resultUser})
-    elif resultUser == "Project already joined":
-        return jsonify({'status': 'failure', 'message': resultUser}), 409
-    elif resultProj == "Project does not exist":
+    if resultProj == "Project does not exist":
+        client.close()
         return jsonify({'status': 'failure', 'message': resultProj}), 404
-    else:
-        return jsonify({'status': 'failure', 'message': "one is wrong"}), 404
+
+    resultUser = usersDB.joinProject(client, userId, projectId) 
+
+    client.close()
+
+    if resultUser == "Project already joined":
+        return jsonify({'status': 'failure', 'message': resultUser}), 409
+
+    return jsonify({'status': 'success', 'message': "Project joined successfully"}) 
+
 
 # Route for adding a new user
 @app.route('/add_user', methods=['POST'])
@@ -177,6 +178,8 @@ def create_project():
     if not userId:
         return jsonify({"status": "failure", "message": "User ID missing"}), 401
     result = projectsDB.createProject(client, projectName, projectId, description)
+    projectsDB.addUser(client, projectId, userId)
+    usersDB.joinProject(client, userId, projectId)
     # Close the MongoDB connection
     client.close()
     # Return a JSON response
