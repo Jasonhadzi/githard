@@ -4,13 +4,25 @@ import { useNavigate } from 'react-router-dom';
 function LoginPage() {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
+  const [newUserId, setNewUserId] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = () => {
     if (userId && password) {
+      localStorage.setItem('userId', userId);
       navigate(`/manager/${userId}`);
     } else {
       alert('Please enter User ID and Password');
+    }
+  };
+
+  const handleCreateUser = () => {
+    if (newUserId && newPassword) {
+      localStorage.setItem('userId', newUserId);
+      navigate(`/manager/${newUserId}`);
+    } else {
+      alert('Please enter User ID and Password to create account');
     }
   };
 
@@ -37,7 +49,12 @@ function LoginPage() {
       color: '#fff',
       border: 'none',
       borderRadius: '5px',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      marginBottom: '10px'
+    },
+    separator: {
+      margin: '20px 0',
+      borderBottom: '1px solid #ccc'
     }
   };
 
@@ -61,6 +78,25 @@ function LoginPage() {
           style={styles.input}
         />
         <button onClick={handleLogin} style={styles.button}>Login</button>
+
+        <div style={styles.separator}></div>
+
+        <h3>Create New User</h3>
+        <input
+          type="text"
+          placeholder="New User ID"
+          value={newUserId}
+          onChange={(e) => setNewUserId(e.target.value)}
+          style={styles.input}
+        />
+        <input
+          type="password"
+          placeholder="New Password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          style={styles.input}
+        />
+        <button onClick={handleCreateUser} style={styles.button}>Create User</button>
       </div>
     </div>
   );
