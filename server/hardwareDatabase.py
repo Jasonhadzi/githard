@@ -18,12 +18,17 @@ def createHardwareSet(client, hwSetName, initCapacity):
 # Function to query a hardware set by its name
 def queryHardwareSet(client, hwSetName):
     # Query and return a hardware set from the database
-    pass
+    return client.hardwareSets.find_one({ 'hwName': hwSetName })#return the hrdware sets by name
 
 # Function to update the availability of a hardware set
 def updateAvailability(client, hwSetName, newAvailability):
-    # Update the availability of an existing hardware set
-    pass
+    # Update the availability of an existing hardware 
+    #chat had to help em with this one to refine the code. 
+    result = client.hardwareSets.update_one(
+        { 'hwName': hwSetName },
+        { '$set': { 'availability': newAvailability } }
+    )
+    return result.modified_count > 0
 
 # Function to request space from a hardware set
 def requestSpace(client, hwSetName, amount):

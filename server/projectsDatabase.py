@@ -76,9 +76,24 @@ def updateUsage(client, projectId, hwSetName):
     pass
 
 # Function to check out hardware for a project
-def checkOutHW(client, projectId, hwSetName, qty, userId):
+def checkOutHW(client, projectId, hwSetName, qty, userId=None):
     # Check out hardware for the specified project and update availability
-    pass
+    hw = hardwareDB.queryHardwareSet(client, hwSetName)
+    if not hw or hw['availability'] < qty:
+        return False
+
+    # update the hardware valibility
+    newAvail = hw['availability'] - qty
+    hardwareDB.updateAvailability(client, hwSetName, newAvail)
+
+    # add tge aty project to the hw sets 
+    client.projects.update_one(
+        { 'projectId': projectId },
+        { '$inc': { f"hwSets.{hwSetName}": qty } },
+        upsert=True
+    )
+
+    return True
 
 # Function to check in hardware for a project
 def checkInHW(client, projectId, hwSetName, qty, userId):
