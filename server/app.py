@@ -224,7 +224,7 @@ def get_all_hw_names():
 @app.route('/get_hw_info', methods=['GET'])
 def get_hw_info():
     # Extract data from request
-    hardwareName = request.args.get("hwName")
+    hardwareName = request.args.get("hwSetName")
     if not hardwareName:
         return jsonify({"error": "Missing 'projectId' in request"}), 400
     # Connect to MongoDB
@@ -233,7 +233,7 @@ def get_hw_info():
     client.close()
     if success: 
         return jsonify({
-            "hardwareName": result.get("hwName"),
+            "hardwareName": result.get("hwSetName"),
             "capacity": result.get("capacity"),
             "availability": result.get("availability")
             }), 200

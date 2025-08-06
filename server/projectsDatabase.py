@@ -121,7 +121,7 @@ def checkOutHW(client, projectId, hwSetName, qty, userId):
     if not user:
         return "User does not exist"
     
-    hw = db["hardware"].find_one({"hwName":hwSetName})
+    hw = db["hardware"].find_one({"hwSetName":hwSetName})
     if not hw:
         return "Hardware does not exist"
     
@@ -152,7 +152,7 @@ def checkInHW(client, projectId, hwSetName, qty, userId):
     if not user:
         return "User does not exist"
     
-    hw = db["hardware"].find_one({"hwName":hwSetName})
+    hw = db["hardware"].find_one({"hwSetName":hwSetName})
     if not hw:
         return "Hardware does not exist"
 
