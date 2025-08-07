@@ -8,6 +8,7 @@ function HardwareManager({ hwSetName, projectId, userId }) {
   const [checkinQty, setCheckinQty] = useState(1);
   const [available, setAvailable] = useState(null);
   const [capacity, setCapacity] = useState(null);
+  const [checkedOut, setCheckedOut] = useState(0); // Amount currently checked out by this project
   const [message, setMessage] = useState("");
   const [isLoadingHwInfo, setIsLoadingHwInfo] = useState(true);
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
@@ -15,24 +16,55 @@ function HardwareManager({ hwSetName, projectId, userId }) {
 
 
 
-  // connect to backend and get the capacity and availability
+  // connect to backend and get the capacity, availability, and project's checked out amount
   useEffect(() => {
     setIsLoadingHwInfo(true);
-    fetch(`/get_hw_info?hwSetName=${encodeURIComponent(hwSetName)}`)
+    
+    // Fetch hardware info and project info in parallel
+    const hwInfoPromise = fetch(`/get_hw_info?hwSetName=${encodeURIComponent(hwSetName)}`)
       .then(async res => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Failed to fetch hardware info');
-        setAvailable(data.availability);
-        setCapacity(data.capacity);
+        return data;
+      });
+    
+    const projectInfoPromise = fetch(`/get_project_info?projectId=${encodeURIComponent(projectId)}`)
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to fetch project info');
+        return data;
+      });
+    
+    Promise.all([hwInfoPromise, projectInfoPromise])
+      .then(([hwData, projectData]) => {
+        setAvailable(hwData.availability);
+        setCapacity(hwData.capacity);
+        
+        // Get the checked out amount for this hardware set from project data
+        let checkedOutAmount = 0;
+        if (projectData.hwSets && projectData.hwSets[hwSetName]) {
+          checkedOutAmount = projectData.hwSets[hwSetName];
+        } else if (hwSetName === 'HWSet1' && projectData.hwSet1 !== undefined) {
+          checkedOutAmount = projectData.hwSet1;
+        } else if (hwSetName === 'HWSet2' && projectData.hwSet2 !== undefined) {
+          checkedOutAmount = projectData.hwSet2;
+        }
+        
+        setCheckedOut(checkedOutAmount);
+        
+        // Reset check-in quantity if nothing is checked out
+        if (checkedOutAmount === 0) {
+          setCheckinQty(1);
+        }
       })
       .catch(err => {
-        console.error("Error loading hardware info", err);
+        console.error("Error loading hardware/project info", err);
         setMessage("Failed to load hardware information");
       })
       .finally(() => {
         setIsLoadingHwInfo(false);
       });
-  }, [hwSetName]);
+  }, [hwSetName, projectId]);
   const handleCheckout = () => {
     if (checkoutQty > available) {
       setMessage("Cannot check out more than available units.");
@@ -61,6 +93,7 @@ function HardwareManager({ hwSetName, projectId, userId }) {
         if (!res.ok) throw new Error(data.error || data.message || 'Checkout failed');
         setMessage("Successfully checked out!");
         setAvailable(prev => prev - checkoutQty);
+        setCheckedOut(prev => prev + checkoutQty);
         setCheckoutQty(1);
       })
       .catch(err => {
@@ -75,6 +108,11 @@ function HardwareManager({ hwSetName, projectId, userId }) {
   const handleCheckin = () => {
     if (checkinQty <= 0) {
       setMessage("Please enter a valid quantity.");
+      return;
+    }
+    
+    if (checkinQty > checkedOut) {
+      setMessage("Cannot check in more than currently checked out.");
       return;
     }
 
@@ -96,6 +134,7 @@ function HardwareManager({ hwSetName, projectId, userId }) {
         if (!res.ok) throw new Error(data.error || data.message || 'Check-in failed');
         setMessage("Successfully checked in!");
         setAvailable(prev => prev + checkinQty);
+        setCheckedOut(prev => prev - checkinQty);
         setCheckinQty(1);
       })
       .catch(err => {
@@ -186,7 +225,8 @@ function HardwareManager({ hwSetName, projectId, userId }) {
           <div style={styles.info}>
             <p><strong>Total Capacity:</strong> {capacity} units</p>
             <p><strong>Available:</strong> {available} units</p>
-            <p><strong>Checked Out:</strong> {capacity - available} units</p>
+            <p><strong>Total Checked Out:</strong> {capacity - available} units</p>
+            <p><strong>Your Project's Checked Out:</strong> {checkedOut} units</p>
           </div>
 
           <div style={styles.section}>
@@ -211,25 +251,44 @@ function HardwareManager({ hwSetName, projectId, userId }) {
             </div>
           </div>
 
-          <div style={styles.section}>
+          <div style={{...styles.section, opacity: checkedOut === 0 ? 0.6 : 1}}>
             <h4>Check In Hardware</h4>
-            <div style={styles.inputGroup}>
-              <label>Quantity:</label>
-              <input 
-                type="number" 
-                value={checkinQty} 
-                onChange={(e) => setCheckinQty(parseInt(e.target.value) || 1)}
-                min="1"
-                style={styles.input}
-              />
-              <button 
-                onClick={handleCheckin} 
-                disabled={isCheckinLoading}
-                style={styles.checkinButton}
-              >
-                {isCheckinLoading ? <LoadingSpinner size={16} /> : 'Check In'}
-              </button>
-            </div>
+            {checkedOut === 0 ? (
+              <p style={{color: '#666', fontStyle: 'italic'}}>
+                No equipment checked out by your project to return.
+              </p>
+            ) : (
+              <div>
+                <div style={styles.inputGroup}>
+                  <label>Quantity:</label>
+                  <input 
+                    type="number" 
+                    value={checkinQty} 
+                    onChange={(e) => {
+                      const newValue = parseInt(e.target.value) || 1;
+                      setCheckinQty(Math.min(newValue, checkedOut));
+                    }}
+                    min="1"
+                    max={checkedOut}
+                    style={styles.input}
+                  />
+                  <button 
+                    onClick={handleCheckin} 
+                    disabled={isCheckinLoading || checkedOut === 0}
+                    style={{
+                      ...styles.checkinButton,
+                      backgroundColor: checkedOut === 0 ? '#ccc' : styles.checkinButton.backgroundColor,
+                      cursor: checkedOut === 0 ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {isCheckinLoading ? <LoadingSpinner size={16} /> : 'Check In'}
+                  </button>
+                </div>
+                <p style={{fontSize: '12px', color: '#666', margin: '5px 0 0 0'}}>
+                  Max: {checkedOut} units available to return
+                </p>
+              </div>
+            )}
           </div>
 
           {message && (
