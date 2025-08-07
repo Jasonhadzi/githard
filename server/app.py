@@ -142,10 +142,11 @@ def add_user():
     # Close the MongoDB connection   
     client.close()
 
-    if result == "User added successfully":
+    if result == "User added successfully" or result == "Guide to Project Page":
         return jsonify({'status': 'success', 'message': result})
     elif result == "UserId already exists":
         return jsonify({'status': 'failure', 'message': result}), 409
+    
 
 # Route for getting the list of user projects
 @app.route('/get_user_projects_list', methods=['POST'])
@@ -320,21 +321,7 @@ def check_in():
     elif result == "Checked in successfully":
         return jsonify({"message": result}), 200
 
-# # Route for creating a new hardware set (no need to create hardware set in this project)
-# @app.route('/create_hardware_set', methods=['POST'])
-# def create_hardware_set():
-#     # Extract data from request
 
-#     # Connect to MongoDB
-#     client = get_mongodb_client()
-
-#     # Attempt to create the hardware set using the hardwareDB module
-
-#     # Close the MongoDB connection
-#     client.close()
-
-#     # Return a JSON response
-#     return jsonify({})
 
 # Route for checking the inventory of projects
 @app.route('/api/inventory', methods=['GET'])

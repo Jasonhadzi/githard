@@ -9,7 +9,11 @@ function ProjectManager() {
   const [projectDescription, setProjectDescription] = useState('');
   const [projectId, setProjectId] = useState('');
   const [existingProjectId, setExistingProjectId] = useState('');
-
+ 
+  const handleLogout = () => {
+  localStorage.removeItem('userId');
+  navigate('/');
+  };
   const handleCreateProject = () => {
     if (projectName && projectDescription && projectId) {
       // Backend logic can be added here
@@ -25,7 +29,8 @@ function ProjectManager() {
         .then(async res => {
           const data = await res.json();
           if (!res.ok) throw new Error(data.message);
-          navigate(`/dashboard/${userId}`);;
+          localStorage.setItem('projectId', projectId);
+          navigate(`/hw/${userId}/${projectId}`);;
         })
         .catch(err => {
           alert(err.message); // shows error from backend (e.g., wrong password)
@@ -48,7 +53,8 @@ function ProjectManager() {
         .then(async res => {
           const data = await res.json();
           if (!res.ok) throw new Error(data.message);
-          navigate(`/dashboard/${userId}`); //this needs to be changed, route to HWsetInfo page
+          localStorage.setItem('projectId', existingProjectId);
+          navigate(`/hw/${userId}/${existingProjectId}`); //this needs to be changed, route to HWsetInfo page
         })
         .catch(err => {
           alert(err.message);
@@ -143,6 +149,10 @@ function ProjectManager() {
         <button style={styles.button} onClick={handleAccessProject}>
           Access Project
         </button>
+        <div style={styles.separator}></div>
+        <button style={styles.button} onClick={handleLogout}>
+        Logout
+      </button>
       </div>
     </div>
   );

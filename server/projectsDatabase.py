@@ -57,7 +57,9 @@ def createProject(client, projectName, projectId, description):
         project_data = {
             "projectName": projectName,
             "description":description,
-            "projectId":projectId
+            "projectId":projectId,
+            "hwSet1":0,
+            "hwSet2":0
         }
         projects_collection.insert_one(project_data)
         return "Project added successfully"

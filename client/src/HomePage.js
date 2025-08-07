@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react'; // Import react and its hooks, but what is the useEffect exactly. got it from a git sorce
-
+import { useNavigate } from 'react-router-dom';
 function HardwareManager({ hwSetName, projectId }) {//here is the new function that we created. handles the checkout of a single hardware set
+
   const [qty, setQty] = useState(0); // quant user wants to check out
   const [available, setAvailable] = useState(null); // how much hardware is avalible now
   const [capacity, setCapacity] = useState(null); // hardware capacity of this set
   const [message, setMessage] = useState(""); // show if the message workd or not 
+
+
 
   // connect to backend and get the capacity and avalibility like in the past hw
   useEffect(() => {
@@ -53,6 +56,7 @@ function HardwareManager({ hwSetName, projectId }) {//here is the new function t
         setMessage("An error occurred.");//if there is error
       });
   };
+
 //got stuck so used chat to generate the reutnr funciton to fix past errors
   return (
     <div style={{ border: "1px solid gray", padding: "16px", marginBottom: "20px" }}> 
@@ -66,101 +70,52 @@ function HardwareManager({ hwSetName, projectId }) {//here is the new function t
   );
 }
 
-function HomePage({ onLogout, user }) {
-  const [input, setInput] = useState('');//demo form
-  const [response, setResponse] = useState('');//server response
-  const projectId = "test-project-id"; // replace with real project ID later...but find out from team waht this does exaclty
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const res = await fetch('/api', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ input }),
-    });
-    const data = await res.json();
-    setResponse(data.response);
+
+function HomePage({ onLogout, user }) {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+  localStorage.removeItem('userId');
+  navigate('/');
   };
+  //const [input, setInput] = useState('');//demo form
+
+  const projectId = "test-project-id"; // replace with real project ID later...but find out from team waht this does exaclty
+  const userId = localStorage.getItem('userId');
+  
+  const styles = { button: {
+      width: '100%',
+      padding: '10px',
+      backgroundColor: '#4da6ff',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '5px',
+      cursor: 'pointer',
+      marginBottom: '10px'
+    }}
+  
+
 
   return (
     <div className="card">
-      <h2>Welcome, {user}!</h2>
+      <h2>Welcome, {userId}!</h2>
       <p>You are logged in succsefully</p>
 
-      <form onSubmit={handleSubmit}>
-        <label>
-          Your Input Request to Server:
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-        </label>
-        <button type="submit">Submit</button>
-      </form>
-
-      <div>Response from server: {response}</div>
 {/* the differnt sets */}
       <HardwareManager hwSetName="HWSet1" projectId={projectId} />
       <HardwareManager hwSetName="HWSet2" projectId={projectId} />
 {/* logout button */}
-      <button onClick={onLogout} className="logout-btn">Logout</button>
+      <button style={styles.button} onClick={handleLogout}>
+        Logout
+      </button>
     </div>
   );
 }
 
 export default HomePage;
 
-//actual code form before under jik
 
 
 
 
-// import React, { useState} from 'react';// this is the logic that is run after the render and not during...wtv that means use chat to figure this out
 
-
-
-// function HomePage({ onLogout, user }) {
-//   const [input, setInput] = useState('');
-//   const [response, setResponse] = useState('');
-
-//   const handleSubmit = async (event) => {
-//     event.preventDefault();
-//     const res = await fetch('/api', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       body: JSON.stringify({ input }),
-//     });
-//     const data = await res.json();
-//     setResponse(data.response);
-//   };
-
-//   return (
-//     <div className="card">
-//       <h2>Welcome, {user}!</h2>
-//       <p>You are logged in successfully</p>
-      
-//       <form onSubmit={handleSubmit}>
-//         <label>
-//           Your Input Request to Server:
-//           <input 
-//             type="text" 
-//             value={input} 
-//             onChange={(e) => setInput(e.target.value)} 
-//           />
-//         </label>
-//         <button type="submit">Submit</button>
-//       </form>
-      
-//       <div>
-//         Response from server: {response}
-//       </div>
-      
-//       <button onClick={onLogout} className="logout-btn">Logout</button>
-//     </div>
-//   );
-// }
-
-// export default HomePage;
