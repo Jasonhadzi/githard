@@ -14,8 +14,12 @@ function ProjectManager() {
   const [isJoinProjectLoading, setIsJoinProjectLoading] = useState(false);
  
   const handleLogout = () => {
-  localStorage.removeItem('userId');
-  navigate('/');
+    localStorage.removeItem('userId');
+    navigate('/');
+  };
+
+  const handleGoBack = () => {
+    navigate(`/dashboard/${userId}`);
   };
   const handleCreateProject = () => {
     if (projectName && projectDescription && projectId) {
@@ -33,7 +37,7 @@ function ProjectManager() {
           const data = await res.json();
           if (!res.ok) throw new Error(data.message);
           localStorage.setItem('projectId', projectId);
-          navigate(`/hw/${userId}/${projectId}`);;
+          navigate(`/project/${userId}/${encodeURIComponent(projectId)}`);;
         })
         .catch(err => {
           alert(err.message); // shows error from backend (e.g., wrong password)
@@ -61,7 +65,7 @@ function ProjectManager() {
           const data = await res.json();
           if (!res.ok) throw new Error(data.message);
           localStorage.setItem('projectId', existingProjectId);
-          navigate(`/hw/${userId}/${existingProjectId}`); //this needs to be changed, route to HWsetInfo page
+          navigate(`/project/${userId}/${encodeURIComponent(existingProjectId)}`);
         })
         .catch(err => {
           alert(err.message);
@@ -76,28 +80,36 @@ function ProjectManager() {
 
   const styles = {
     container: {
-      height: '100vh',
+      minHeight: '100vh',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      padding: '20px',
+      backgroundColor: '#f5f5f5',
+      boxSizing: 'border-box'
     },
     card: {
       backgroundColor: '#fff',
       padding: '40px',
       borderRadius: '12px',
       boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-      width: '400px',
-      textAlign: 'center'
+      width: '100%',
+      maxWidth: '400px',
+      textAlign: 'center',
+      boxSizing: 'border-box'
     },
     title: {
-      marginBottom: '20px'
+      marginBottom: '20px',
+      color: '#333',
+      fontSize: '24px'
     },
     input: {
       width: '100%',
       padding: '10px',
       marginBottom: '15px',
       borderRadius: '5px',
-      border: '1px solid #ccc'
+      border: '1px solid #ccc',
+      boxSizing: 'border-box'
     },
     button: {
       width: '100%',
@@ -107,7 +119,20 @@ function ProjectManager() {
       border: 'none',
       borderRadius: '5px',
       cursor: 'pointer',
-      marginBottom: '15px'
+      marginBottom: '15px',
+      fontSize: '16px',
+      transition: 'background-color 0.3s ease'
+    },
+    secondaryButton: {
+      width: '100%',
+      padding: '12px',
+      backgroundColor: '#6c757d',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '5px',
+      cursor: 'pointer',
+      fontSize: '16px',
+      transition: 'background-color 0.3s ease'
     },
     separator: {
       margin: '20px 0',
@@ -160,9 +185,12 @@ function ProjectManager() {
           {isJoinProjectLoading ? <LoadingSpinner size={16} /> : 'Access Project'}
         </button>
         <div style={styles.separator}></div>
-        <button style={styles.button} onClick={handleLogout}>
-        Logout
-      </button>
+        <button style={styles.button} onClick={handleGoBack}>
+          Back to Dashboard
+        </button>
+        <button style={styles.secondaryButton} onClick={handleLogout}>
+            Logout
+        </button>
       </div>
     </div>
   );

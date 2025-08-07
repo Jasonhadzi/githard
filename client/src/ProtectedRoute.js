@@ -14,6 +14,8 @@ function ProtectedRoute({ children }) {
   // Check if the URL userId matches the authenticated user
   if (userId && userId !== authenticatedUserId) {
     // URL userId doesn't match authenticated user, redirect to login
+    localStorage.removeItem('userId');
+    localStorage.removeItem('projectId');
     return <Navigate to="/" replace />;
   }
 

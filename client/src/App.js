@@ -4,6 +4,7 @@ import LoginPage from './LoginPage';
 import ProjectManager from './projectManager';
 import ProjectDashboard from './projectDashboard';
 import HomePage from './HomePage';
+import UserDashboard from './UserDashboard';
 import ProtectedRoute from './ProtectedRoute';
 
 function App() {
@@ -11,17 +12,22 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/manager/:userId" element={
+        <Route path="/dashboard/:userId" element={
+          <ProtectedRoute>
+            <UserDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/create-project/:userId" element={
           <ProtectedRoute>
             <ProjectManager />
           </ProtectedRoute>
         } />
-        <Route path="/dashboard/:userId" element={
+        <Route path="/project/:userId/:projectId" element={
           <ProtectedRoute>
             <ProjectDashboard />
           </ProtectedRoute>
         } />
-        <Route path="/hw/:userId/:projectId" element={
+        <Route path="/hw/:userId/:projectId/:hwSetName" element={
           <ProtectedRoute>
             <HomePage />
           </ProtectedRoute>

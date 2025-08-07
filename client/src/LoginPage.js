@@ -23,7 +23,7 @@ function LoginPage() {
           const data = await res.json();
           if (!res.ok) throw new Error(data.message);
           localStorage.setItem('userId', userId);
-          navigate(`/manager/${userId}`);
+          navigate(`/dashboard/${userId}`);
         })
         .catch(err => {
           alert(err.message); // shows error from backend (e.g., wrong password)
@@ -48,7 +48,7 @@ function LoginPage() {
           const data = await res.json();
           if (!res.ok) throw new Error(data.message);
           localStorage.setItem('userId', newUserId);
-          navigate(`/manager/${newUserId}`);
+          navigate(`/dashboard/${newUserId}`);
         })
         .catch(err => {
           alert(err.message); // shows error like "user already exists"
@@ -62,20 +62,32 @@ function LoginPage() {
   };
 
   const styles = {
+    container: {
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+      backgroundColor: '#f5f5f5',
+      boxSizing: 'border-box'
+    },
     card: {
       backgroundColor: '#fff',
       padding: '30px',
-      borderRadius: '10px',
-      boxShadow: '0 0 15px rgba(0, 0, 0, 0.2)',
+      borderRadius: '12px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
       textAlign: 'center',
-      width: '300px'
+      width: '100%',
+      maxWidth: '350px',
+      boxSizing: 'border-box'
     },
     input: {
       width: '100%',
       padding: '10px',
       marginBottom: '15px',
       borderRadius: '5px',
-      border: '1px solid #ccc'
+      border: '1px solid #ccc',
+      boxSizing: 'border-box'
     },
     button: {
       width: '100%',
@@ -85,7 +97,9 @@ function LoginPage() {
       border: 'none',
       borderRadius: '5px',
       cursor: 'pointer',
-      marginBottom: '10px'
+      marginBottom: '10px',
+      fontSize: '16px',
+      transition: 'background-color 0.3s ease'
     },
     separator: {
       margin: '20px 0',
@@ -94,7 +108,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="centered-container">
+    <div style={styles.container}>
       <div style={styles.card}>
         <h2>GitHard Haas App</h2>
         <h3>Login</h3>
