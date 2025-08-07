@@ -84,7 +84,7 @@ def joinProject(client, userId, projectId):
 
 
     if projectId in user.get("projects", []):
-        return "Project already joined"
+        return "Guide to Project Page"
     
     users_collection.update_one(
         {"userId": userId},

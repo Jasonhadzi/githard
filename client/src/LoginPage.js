@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from './LoadingSpinner';
 
 function LoginPage() {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [newUserId, setNewUserId] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [isCreateUserLoading, setIsCreateUserLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = () => {
     if (userId && password) {
-        fetch('/login', {
+      setIsLoginLoading(true);
+      fetch('/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, password })
@@ -19,10 +23,13 @@ function LoginPage() {
           const data = await res.json();
           if (!res.ok) throw new Error(data.message);
           localStorage.setItem('userId', userId);
-          navigate(`/manager/${userId}`);
+          navigate(`/dashboard/${userId}`);
         })
         .catch(err => {
           alert(err.message); // shows error from backend (e.g., wrong password)
+        })
+        .finally(() => {
+          setIsLoginLoading(false);
         });
     } else {
       alert('Please enter User ID and Password');
@@ -31,6 +38,7 @@ function LoginPage() {
 
   const handleCreateUser = () => {
     if (newUserId && newPassword) {
+      setIsCreateUserLoading(true);
       fetch('/add_user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -40,10 +48,13 @@ function LoginPage() {
           const data = await res.json();
           if (!res.ok) throw new Error(data.message);
           localStorage.setItem('userId', newUserId);
-          navigate(`/manager/${newUserId}`);
+          navigate(`/dashboard/${newUserId}`);
         })
         .catch(err => {
           alert(err.message); // shows error like "user already exists"
+        })
+        .finally(() => {
+          setIsCreateUserLoading(false);
         });
     } else {
       alert('Please enter User ID and Password to create account');
@@ -51,20 +62,32 @@ function LoginPage() {
   };
 
   const styles = {
+    container: {
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+      backgroundColor: '#f5f5f5',
+      boxSizing: 'border-box'
+    },
     card: {
       backgroundColor: '#fff',
       padding: '30px',
-      borderRadius: '10px',
-      boxShadow: '0 0 15px rgba(0, 0, 0, 0.2)',
+      borderRadius: '12px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
       textAlign: 'center',
-      width: '300px'
+      width: '100%',
+      maxWidth: '350px',
+      boxSizing: 'border-box'
     },
     input: {
       width: '100%',
       padding: '10px',
       marginBottom: '15px',
       borderRadius: '5px',
-      border: '1px solid #ccc'
+      border: '1px solid #ccc',
+      boxSizing: 'border-box'
     },
     button: {
       width: '100%',
@@ -74,7 +97,9 @@ function LoginPage() {
       border: 'none',
       borderRadius: '5px',
       cursor: 'pointer',
-      marginBottom: '10px'
+      marginBottom: '10px',
+      fontSize: '16px',
+      transition: 'background-color 0.3s ease'
     },
     separator: {
       margin: '20px 0',
@@ -83,7 +108,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="centered-container">
+    <div style={styles.container}>
       <div style={styles.card}>
         <h2>GitHard Haas App</h2>
         <h3>Login</h3>
@@ -101,7 +126,9 @@ function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           style={styles.input}
         />
-        <button onClick={handleLogin} style={styles.button}>Login</button>
+        <button onClick={handleLogin} style={styles.button} disabled={isLoginLoading}>
+          {isLoginLoading ? <LoadingSpinner size={16} /> : 'Login'}
+        </button>
 
         <div style={styles.separator}></div>
 
@@ -120,7 +147,9 @@ function LoginPage() {
           onChange={(e) => setNewPassword(e.target.value)}
           style={styles.input}
         />
-        <button onClick={handleCreateUser} style={styles.button}>Create User</button>
+        <button onClick={handleCreateUser} style={styles.button} disabled={isCreateUserLoading}>
+          {isCreateUserLoading ? <LoadingSpinner size={16} /> : 'Create User'}
+        </button>
       </div>
     </div>
   );
