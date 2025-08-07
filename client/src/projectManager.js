@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from './LoadingSpinner';
 
 function ProjectManager() {
   const navigate = useNavigate();
@@ -9,6 +10,8 @@ function ProjectManager() {
   const [projectDescription, setProjectDescription] = useState('');
   const [projectId, setProjectId] = useState('');
   const [existingProjectId, setExistingProjectId] = useState('');
+  const [isCreateProjectLoading, setIsCreateProjectLoading] = useState(false);
+  const [isJoinProjectLoading, setIsJoinProjectLoading] = useState(false);
  
   const handleLogout = () => {
   localStorage.removeItem('userId');
@@ -16,7 +19,7 @@ function ProjectManager() {
   };
   const handleCreateProject = () => {
     if (projectName && projectDescription && projectId) {
-      // Backend logic can be added here
+      setIsCreateProjectLoading(true);
       fetch('/create_project', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -34,6 +37,9 @@ function ProjectManager() {
         })
         .catch(err => {
           alert(err.message); // shows error from backend (e.g., wrong password)
+        })
+        .finally(() => {
+          setIsCreateProjectLoading(false);
         });
      
     } else {
@@ -43,6 +49,7 @@ function ProjectManager() {
 
   const handleAccessProject = () => {
     if (existingProjectId) {
+      setIsJoinProjectLoading(true);
       fetch('/join_project', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -58,6 +65,9 @@ function ProjectManager() {
         })
         .catch(err => {
           alert(err.message);
+        })
+        .finally(() => {
+          setIsJoinProjectLoading(false);
         });    
     } else {
       alert('Please enter a Project ID to access.');
@@ -132,8 +142,8 @@ function ProjectManager() {
           onChange={(e) => setProjectId(e.target.value)}
           style={styles.input}
         />
-        <button style={styles.button} onClick={handleCreateProject}>
-          Create Project
+        <button style={styles.button} onClick={handleCreateProject} disabled={isCreateProjectLoading}>
+          {isCreateProjectLoading ? <LoadingSpinner size={16} /> : 'Create Project'}
         </button>
 
         <div style={styles.separator}></div>
@@ -146,8 +156,8 @@ function ProjectManager() {
           onChange={(e) => setExistingProjectId(e.target.value)}
           style={styles.input}
         />
-        <button style={styles.button} onClick={handleAccessProject}>
-          Access Project
+        <button style={styles.button} onClick={handleAccessProject} disabled={isJoinProjectLoading}>
+          {isJoinProjectLoading ? <LoadingSpinner size={16} /> : 'Access Project'}
         </button>
         <div style={styles.separator}></div>
         <button style={styles.button} onClick={handleLogout}>

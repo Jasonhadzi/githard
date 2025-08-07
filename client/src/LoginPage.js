@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from './LoadingSpinner';
 
 function LoginPage() {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [newUserId, setNewUserId] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [isCreateUserLoading, setIsCreateUserLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = () => {
     if (userId && password) {
-        fetch('/login', {
+      setIsLoginLoading(true);
+      fetch('/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, password })
@@ -23,6 +27,9 @@ function LoginPage() {
         })
         .catch(err => {
           alert(err.message); // shows error from backend (e.g., wrong password)
+        })
+        .finally(() => {
+          setIsLoginLoading(false);
         });
     } else {
       alert('Please enter User ID and Password');
@@ -31,6 +38,7 @@ function LoginPage() {
 
   const handleCreateUser = () => {
     if (newUserId && newPassword) {
+      setIsCreateUserLoading(true);
       fetch('/add_user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,6 +52,9 @@ function LoginPage() {
         })
         .catch(err => {
           alert(err.message); // shows error like "user already exists"
+        })
+        .finally(() => {
+          setIsCreateUserLoading(false);
         });
     } else {
       alert('Please enter User ID and Password to create account');
@@ -101,7 +112,9 @@ function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           style={styles.input}
         />
-        <button onClick={handleLogin} style={styles.button}>Login</button>
+        <button onClick={handleLogin} style={styles.button} disabled={isLoginLoading}>
+          {isLoginLoading ? <LoadingSpinner size={16} /> : 'Login'}
+        </button>
 
         <div style={styles.separator}></div>
 
@@ -120,7 +133,9 @@ function LoginPage() {
           onChange={(e) => setNewPassword(e.target.value)}
           style={styles.input}
         />
-        <button onClick={handleCreateUser} style={styles.button}>Create User</button>
+        <button onClick={handleCreateUser} style={styles.button} disabled={isCreateUserLoading}>
+          {isCreateUserLoading ? <LoadingSpinner size={16} /> : 'Create User'}
+        </button>
       </div>
     </div>
   );

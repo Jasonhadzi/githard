@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 function ProjectDashboard() {
   const navigate = useNavigate();
   const userId = localStorage.getItem('userId');
-
+  const [projects, setProjects] = useState([]);
 
   useEffect(() => {
     // Placeholder data until backend is ready
