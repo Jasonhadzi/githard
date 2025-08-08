@@ -1,5 +1,6 @@
 # Import necessary libraries and modules
 from pymongo import MongoClient
+from utils.security import encrypt, decrypt
 
 import projectsDatabase as projectsDB
 
@@ -27,12 +28,13 @@ def addUser(client, userId, password):
     """
     users_collection = client["GitHard"]["users"]
     user = users_collection.find_one({"userId": userId})
+    crypted = encrypt(password)
     if user:
         return "UserId already exists"
     else:
         user_data = {
             "userId": userId,
-            "password": password,
+            "password": crypted,
             "projects":[]
         }
         users_collection.insert_one(user_data)
@@ -56,12 +58,14 @@ def login(client, userId, password):
     Returns:
         string: indicating if user is found, wrong password, or success.
     """
+    
     users_collection = client["GitHard"]["users"]
     user = users_collection.find_one({"userId": userId})
+    decrypted = decrypt(user["password"])
 
     if not user:
         return "user_not_found"
-    elif user["password"] != password:
+    elif decrypted != password:
         return "wrong_password"
     else:
         return "success"
@@ -74,10 +78,10 @@ def joinProject(client, userId, projectId):
     Args:
         client: A MongoClient instance.
         userId (str): The user's unique ID.
-        projectId (str): The user's password (plaintext or hashed, depending on usage).
+        projectId (str): Unique ProjectId
 
     Returns:
-        string: indicating if user is found, wrong password, or success.
+        string: indicating if project joined.
     """
     users_collection = client["GitHard"]["users"]
     user = users_collection.find_one({"userId": userId})
