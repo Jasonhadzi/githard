@@ -164,7 +164,7 @@ function UserDashboard() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h1 style={styles.title}>Welcome back, {userId}!</h1>
+        <h1 style={styles.title}>Welcome, {userId}!</h1>
         <p style={styles.subtitle}>Here are your projects</p>
 
         <div style={styles.projectsContainer}>
